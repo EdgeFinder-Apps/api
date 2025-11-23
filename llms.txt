@@ -1,0 +1,107 @@
+# EdgeFinder API
+
+REST API for discovering arbitrage opportunities between Polymarket and Kalshi prediction markets with x402 payment integration.
+
+> Built with Fastify, TypeScript, Supabase, and x402 payment protocol for pay-per-use data access with USDC on Arbitrum.
+
+## Getting Started
+
+- [Quick Start Guide](QUICKSTART.md): Get the EdgeFinder API running in 5 minutes
+- [README](README.md): Complete API documentation with endpoint details, authentication, and deployment guide
+- [Examples](EXAMPLES.md): Integration examples for JavaScript/TypeScript, React, and Python clients
+- [Project Summary](PROJECT_SUMMARY.md): Overview of architecture, design decisions, and key features
+
+## API Endpoints
+
+### Core Endpoints
+
+- [Root Endpoint](src/index.ts#72-88): `GET /` - API information and available endpoints
+- [Health Check](src/index.ts#64-70): `GET /health` - Server health status and version information
+
+### Arbitrage Opportunities
+
+- [Get Opportunities](src/routes/opportunities.ts#10-46): `GET /opportunities` - Fetch current arbitrage opportunities between Polymarket and Kalshi (top 50 by spread)
+
+### x402 Payment Flow
+
+- [Start Payment](src/routes/payment.ts#33-95): `POST /payment/start` - Initiate x402 payment flow to unlock data access
+- [Settle Payment](src/routes/payment.ts#98-204): `POST /payment/settle` - Complete payment and receive dataset access with entitlement
+- [Payment Status](src/routes/payment.ts#207-259): `GET /payment/status` - Check current payment status and entitlement for a wallet address
+
+## Configuration
+
+- [Configuration Management](src/config.ts): Environment variables, validation, and server settings
+- [Environment Template](.env.example): Template for required and optional environment variables
+
+## Architecture
+
+### Core Components
+
+- [Server Entry Point](src/index.ts): Main Fastify server with CORS, rate limiting, error handling, and graceful shutdown
+- [Type Definitions](src/types.ts): TypeScript interfaces for matched events, payment flow, datasets, and API responses
+
+### Routes
+
+- [Opportunities Routes](src/routes/opportunities.ts): Arbitrage data endpoints
+- [Payment Routes](src/routes/payment.ts): x402 payment flow endpoints
+
+### Services
+
+- [Supabase Service](src/services/supabase.ts): Database operations for opportunities, datasets, and entitlements
+- [Payment Service](src/services/payment.ts): Payment facilitator integration and transaction handling
+
+### Utilities
+
+- [Response Helpers](src/utils/response.ts): Standardized API responses with success/error formatting
+- [Validation Utilities](src/utils/validation.ts): Input validation for wallet addresses, permits, and payment requirements
+
+## Features
+
+### Payment Integration
+
+- **x402 Protocol**: Pay-per-use API access with USDC on Arbitrum network
+- **EIP-3009 Permits**: Gasless payments using permit signatures
+- **Entitlement Management**: Time-based access control for paid datasets
+- **Development Bypass**: Testing mode to bypass real payments during development
+
+### Data Access
+
+- **Arbitrage Opportunities**: Real-time market comparison across Polymarket and Kalshi
+- **Shared Datasets**: Hourly refreshed datasets with entitlement-based access
+- **Spread Filtering**: Opportunities ordered by spread percentage (highest first)
+
+### Production Features
+
+- **Rate Limiting**: 100 requests per 15 minutes per IP (configurable)
+- **CORS Support**: Cross-origin resource sharing with configurable origins
+- **Error Handling**: Consistent error responses with codes and request tracking
+- **Request Logging**: Structured JSON logs with Pino logger
+- **Type Safety**: Full TypeScript implementation with strict validation
+- **Graceful Shutdown**: Clean server termination on SIGINT/SIGTERM signals
+
+## Error Codes
+
+- `INVALID_REQUEST`: Malformed request data
+- `INVALID_WALLET`: Invalid wallet address format
+- `INVALID_SIGNATURE`: Invalid permit signature
+- `PAYMENT_REQUIRED`: Payment needed for access
+- `PAYMENT_FAILED`: Payment processing failed
+- `ENTITLEMENT_EXPIRED`: Access has expired
+- `RATE_LIMIT_EXCEEDED`: Too many requests
+- `NO_DATA_AVAILABLE`: No data in database
+- `INTERNAL_ERROR`: Server error
+- `VALIDATION_ERROR`: Request validation failed
+
+## Development
+
+- **Hot Reload**: Development mode with automatic restart on file changes
+- **TypeScript**: Full TypeScript support with strict type checking
+- **ESLint**: Code linting and formatting configuration
+- **Pretty Logs**: Development-friendly colored logs with Pino Pretty
+
+## Deployment
+
+- **Build System**: TypeScript compilation to JavaScript
+- **Process Management**: Compatible with PM2, systemd, or containerization
+- **Environment Configuration**: Separate development and production settings
+- **HTTPS Support**: Ready for reverse proxy integration (nginx, Caddy)
